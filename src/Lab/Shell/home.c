@@ -71,6 +71,11 @@ int main()
 	val = 0;
 	const char *homedir = pw->pw_dir;
 	printf("%s \n", homedir);
+	chdir("..");
+	char pth[40];
+	getcwd(pth,sizeof(pth));
+	printf("Current Working directory .. ");
+	printf("%s \n", pth);
 	char str[30];
 	//char *arrWords[100];
 	int i;	
