@@ -72,10 +72,6 @@ void addToList(char *sentence)
 
 int main()
 {
-	//exec("clear");
-	char *temp = "clear";
-	char *arg[] = {"clear", NULL};
-	execvp(arg[0], arg);
 	commandCount = 0;
 	currentIndex = 0;
 	struct passwd *pw = getpwuid(getuid());
