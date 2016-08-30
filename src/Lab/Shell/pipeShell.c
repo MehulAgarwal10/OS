@@ -60,21 +60,22 @@ void display()
 
 void parse(char *str)
 {
-
+	//printf("Entering parse function .. \n");
 	int length = strlen(str);
 	arrWords[val] = (char *)malloc(sizeof(char)* length+1);
 
 	strcpy(arrWords[val],str);
+	//printf("Copied command to arrWords.. \n");
 	val++;
 	commandCount++;
 	arrWords[val] = '\0';
-	
+	//printf("Made character null .. \n");
 
 }
 
 void addToList(char *sentence)
 {
-	
+	//printf("Parsing sentence .. %s.. \n", sentence);
 	int length = strlen(sentence);
 	char *word = (char *)calloc(1, sizeof(char));
 	int wordI=0;
@@ -101,12 +102,14 @@ void addToList(char *sentence)
 	parse(word);
 	word = (char *)(calloc(1,sizeof(char)));
 	wordI = 0;
+	//printf("Done parsing.. \n");
 }
 
 void takeInput()
 {
 	input = (char *)(malloc(200 * sizeof(char)));
 	gets(input);
+	//printf("%s", input);
 
 }
 
@@ -138,11 +141,18 @@ void seperate()
 	for(i=0;i<length;i++)
 	{
 		temp = input[i];
+			//printf("Reading line : \n");
 		if(temp == '|')
 		{
+			//printf("Pipe found .. \n");
 			char *comm = (char *)(malloc(sizeof(char)*commandLength));
+			//trim(command, comm);
+			//printf("Trimmed string : %s..\n", comm);
+					//pipedCommands = (char **)(realloc(pipedCommands, sizeof(char) * (i+1)));
 			pipedCommands[pipeI] = (char *)(malloc(sizeof(char) * strlen(command+1)));
 			strcpy(pipedCommands[pipeI++],command);
+			//pipeCount++;
+			//pipedCommands[i+1] = '\0';
 			command = (char *)(malloc(sizeof(char) * 1));
 			commandLength = 0;
 		}
@@ -158,8 +168,17 @@ void seperate()
 			//trim(command, comm);
 
 			strcpy(pipedCommands[pipeI++],command);
+			//pipeCount++;
+			//pipedCommands[i+1] = '\0';
 			command = (char *)(malloc(sizeof(char) * 1));
 			commandLength = 0;
+
+	//printf("Seperated commands .. : \n");
+	for(i=0;i<=pipeCount;i++)
+	{
+		//printf("%s - ", pipedCommands[i]);
+	}
+	//printf("\n");
 
 }
 
@@ -174,6 +193,7 @@ void pipedProcess()
 	{
 		val = 0;	
 		arrWords = (char**)realloc(arrWords,(100*sizeof(char)));
+		//printf("Reading Command List (%d) ..\n", (i+1));
 		if(pipe(pfd) < 0)
 			{
 				printf("Error in piping \n");
@@ -192,17 +212,23 @@ void pipedProcess()
 			fd = pfd[0];
 			if(i == pipeCount)
 			{
+				//printf("Reached end of full command now.. \n");
 				exit(0);
 			}
 		}
 		else if(pid == 0)
 		{
+			//printf("In Child for process %d.. Command : %s..\n", (i+1), pipedCommands[i]);
 			char *tempString;
 			trim(pipedCommands[i],tempString);
 			addToList(tempString);
+			//printf("Executing the command .. %s.. \n", arrWords[0]);
+			// Add to execution list here
+			
 			dup2(fd,0);
 			if(i != pipeCount)
 			{
+				//printf("Sending to Standard Output.. \n");
 				dup2(pfd[1],1);
 			}
 			else
@@ -211,11 +237,25 @@ void pipedProcess()
 			}
 			close(pfd[0]);
 			close(pfd[1]);
+			//printf("Commands here : ");
+			for(i=0;i<commandCount;i++)
+			{
+				//printf("%s, ",arrWords[i]);
+			}
+			//printf("\n");
 			if(strcmp(arrWords[0], "ls") == 0)
 			{
 				char addit[] = "--color";
 				addToList(addit);
+				/*
+				printf("Executing ls..");
+				argv[0] = "ls";
+				argv[1] = "--color";
+				execvp(argv[0], argv);
+				exit(1);
+				*/
 			}
+			//printf("Beginning execution .. \n");
 			if(execvp(arrWords[0], arrWords)<1)
 			{
 				printf("%s: command not found\n", arrWords[0]);
@@ -241,21 +281,36 @@ int main()
 	char com[20];
 	char path[200];
 	val = 0;
+	//char *arg[100];
+	
+	//char path2[205];
 	while(1)
 	{
 	pipeCount = 0;
 	arrWords = (char**)realloc(arrWords,100*sizeof(char));
+	//commandCount = 0;
 	val = 0;
 	currentIndex += commandCount;
 
 	getcwd(path,sizeof(path));
+	//printf(ANSI_COLOR_BLUE 	"MyShell:" ANSI_COLOR_RESET);
+	//printf(ANSI_COLOR_GREEN 	"$ "  ANSI_COLOR_RESET, path);
 	printf(ANSI_COLOR_BLUE "MyShell:" ANSI_COLOR_GREEN "$ " ANSI_COLOR_RESET);	
+	//printf(path2);		
+	                      //  Old get command _ gets(com);
+	//parse(com, arrWords);
+	                         //   Old Parse Command __ addToList(com);
+	//char *arg[] = {"", NULL};
+	//arg[0] = com;
 	takeInput();
+	//printf("Input read : %s.. \n",input);
 	countPipes();
+	//printf("Pipes found : %d..\n", pipeCount);
 	
 	
 	if(pipeCount == 0)
 	{
+		//printf("No pipes found .. \n");
 		addToList(input);
 	if(strcmp(arrWords[0],"cd") == 0)
 	{
@@ -266,6 +321,7 @@ int main()
 			continue;
 		}
 		int len = strlen(arrWords[1]);
+		//char path[len+1] = arrWords[1];
 		char *pt = (char *)(calloc(len,sizeof(char)));
 		strcpy(pt,arrWords[1]);
 
@@ -280,6 +336,8 @@ int main()
 		printf("Goodbye\n");
 		return;
 	}
+	///printf("Forking .. \n");
+	
 
 	pid = fork();
 	if(pid == 0)
@@ -293,6 +351,13 @@ int main()
 	{
 		char addit[] = "--color";
 		addToList(addit);
+		/*
+		printf("Executing ls..");
+		argv[0] = "ls";
+		argv[1] = "--color";
+		execvp(argv[0], argv);
+		exit(1);
+		*/
 	}
 	if(execvp(arrWords[0], arrWords)<1)
 	{
