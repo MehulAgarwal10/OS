@@ -15,6 +15,7 @@ int val;
 char **arrWords;
 char **pipedCommands;
 int commandCount;
+int currentIndex;
 int pipeCount;
 char *input;
 char *fulllist[200];
@@ -73,9 +74,14 @@ void display()
 
 void parse(char *str)
 {
+	//char *str;
+	//trim(str2,str);
+	//printf("Command word : %s..\n",str);
 	int length = strlen(str);
 	arrWords[val] = (char *)malloc(sizeof(char)* length+1);
 	strcpy(arrWords[val],str);
+	//fulllist[historyCount] = (char *)(malloc(sizeof(char)*length+1));
+	//strcpy(fulllist[historyCount++],str);
 	val++;
 	commandCount++;
 	arrWords[val] = '\0';
@@ -280,6 +286,7 @@ int main()
 		const char *homedir = pw->pw_dir;
 		char *argv[] = {"", "", NULL};
 		commandCount = 0;
+		currentIndex = 0;
 		int pid;
 		char com[20];
 		char path[200];
@@ -289,6 +296,8 @@ int main()
 		pipeCount = 0;
 		arrWords = (char**)realloc(arrWords,100*sizeof(char));
 		val = 0;
+		currentIndex += commandCount;
+
 		getcwd(path,sizeof(path));
 		printf(ANSI_COLOR_BLUE "MyShell:" ANSI_COLOR_GREEN "$ " ANSI_COLOR_RESET);	
 		takeInput();

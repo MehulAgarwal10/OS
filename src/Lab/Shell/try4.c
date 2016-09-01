@@ -5,7 +5,6 @@
 #include <pwd.h>
 #include <stdlib.h>
 #include <malloc.h>
-#include <signal.h>
 
 #define ANSI_COLOR_GREEN   "\x1b[92m\x1b[1m"
 #define ANSI_COLOR_BLUE "\x1b[94m\x1b[1m"
@@ -15,11 +14,9 @@ int val;
 char **arrWords;
 char **pipedCommands;
 int commandCount;
+int currentIndex;
 int pipeCount;
 char *input;
-char *fulllist[200];
-int historyCount;
-
 void trim(char *input, char *output)
 {
 
@@ -47,24 +44,14 @@ void trim(char *input, char *output)
 		j++;
 	}
 }
-
-void *func()
-{
-	exit(-1);
-}
-
-void funcMain()
-{
-	;
-}
 void display()
 {
 	int i;
-	for(i=0;i<=val;i++)
+	for(i=0;i<commandCount;i++)
 	{
-		if(arrWords[i] != NULL)
+		if(arrWords[currentIndex+i] != NULL)
 		{
-			printf("%s\t",arrWords[i]);
+			printf("%s\t",arrWords[currentIndex+i]);
 		}
 	}
 	printf("\n");
@@ -73,23 +60,17 @@ void display()
 
 void parse(char *str)
 {
+
 	int length = strlen(str);
-	arrWords[val] = (char *)malloc(sizeof(char)* length+1);
-	strcpy(arrWords[val],str);
+	arrWords[currentIndex+val] = (char *)malloc(sizeof(char)* length+1);
+
+	strcpy(arrWords[currentIndex+val],str);
 	val++;
 	commandCount++;
-	arrWords[val] = '\0';
+	printf("CommandCount increased .. \n");
+	arrWords[currentIndex+val] = '\0';
 	
 
-}
-
-void showHistory()
-{
-	int i =0;
-	for(i=0;i<historyCount;i++)
-	{
-		printf("%d\t%s\n",(i+1),fulllist[i]);
-	}
 }
 
 void addToList(char *sentence)
@@ -125,11 +106,9 @@ void addToList(char *sentence)
 
 void takeInput()
 {
-	char *inputString = (char *)(malloc(200 * sizeof(char)));
-	char *check = (char *)(malloc(200 * sizeof(char)));
 	input = (char *)(malloc(200 * sizeof(char)));
-	gets(inputString);
-	trim(inputString,input);
+	gets(input);
+
 }
 
 void countPipes()
@@ -195,7 +174,7 @@ void pipedProcess()
 	for(i=0;i<=pipeCount;i++)
 	{
 		val = 0;	
-		arrWords = (char**)realloc(arrWords,(100*sizeof(char)));
+		//arrWords = (char**)realloc(arrWords,(100*sizeof(char)));
 		if(pipe(pfd) < 0)
 			{
 				printf("Error in piping \n");
@@ -207,7 +186,7 @@ void pipedProcess()
 		}
 		if(pid > 0)
 		{
-			signal(SIGINT,funcMain);
+			
 			//add random sigchld signal() here
 			waitpid(-1,0,0);
 			close(pfd[1]);
@@ -219,7 +198,6 @@ void pipedProcess()
 		}
 		else if(pid == 0)
 		{
-			signal(SIGINT,func);
 			char *tempString;
 			trim(pipedCommands[i],tempString);
 			addToList(tempString);
@@ -234,18 +212,14 @@ void pipedProcess()
 			}
 			close(pfd[0]);
 			close(pfd[1]);
-			if(strcmp(arrWords[0], "ls") == 0)
+			if(strcmp(arrWords[currentIndex], "ls") == 0)
 			{
 				char addit[] = "--color";
 				addToList(addit);
 			}
-			if(strcmp(arrWords[0], "history") == 0)
+			if(execvp(arrWords[currentIndex], arrWords)<1)
 			{
-				showHistory();
-			}
-			else if(execvp(arrWords[0], arrWords)<1)
-			{
-				printf("%s: command not found\n", arrWords[0]);
+				printf("%s: command not found\n", arrWords[currentIndex]);
 			}
 					//Execute
 					exit(-1);
@@ -254,132 +228,110 @@ void pipedProcess()
 
 }
 
-
-int isString(char *cc)
-{
-	char temp;
-	int i = 0,len = strlen(cc);
-	for(i=0;i<len;i++)
-	{
-		temp = cc[i];
-		if(temp != ' ' || temp != '\n' || temp != '\t' || temp != '\0')
-		{
-			printf("Returning 1.. \n");
-			return 1;
-		}
-	}
-	return 0;
-}
-
 int main()
 {
-		pipeCount = 0;
-		historyCount = 0;
-		//return;
-		struct passwd *pw = getpwuid(getuid());
-		const char *homedir = pw->pw_dir;
-		char *argv[] = {"", "", NULL};
-		commandCount = 0;
-		int pid;
-		char com[20];
-		char path[200];
-		val = 0;
-		while(1)
-		{
-		pipeCount = 0;
-		arrWords = (char**)realloc(arrWords,100*sizeof(char));
-		val = 0;
-		getcwd(path,sizeof(path));
-		printf(ANSI_COLOR_BLUE "MyShell:" ANSI_COLOR_GREEN "$ " ANSI_COLOR_RESET);	
-		takeInput();
-		
-		countPipes();
-		//printf("Counted pipes ..\n");
-		if(input[0] == NULL)
-		{
-			continue;
-		}
-		fulllist[historyCount] = (char *)(calloc(50,sizeof(char)));
-		strcpy(fulllist[historyCount++],input);
-		if(pipeCount == 0)
-		{
-			addToList(input);
-		if(strcmp(arrWords[0],"cd") == 0)
-		{
-			if(arrWords[1] == NULL)
-			{
-				
-				chdir(homedir);
-				continue;
-			}
-			int len = strlen(arrWords[1]);
-			char *pt = (char *)(calloc(len,sizeof(char)));
-			strcpy(pt,arrWords[1]);
-
-			if(chdir(pt)!=0)
-			{
-				printf("%s: no such directory\n",pt);
-			}
-			continue;
-		}
-		else if(strcmp(arrWords[0], "exit") == 0)
-		{
-			//printf("main() exit called .. \n");
-			printf("Goodbye\n");
-			return;
-		}
-
-		pid = fork();
-		if(pid == 0)
-		{
-			signal(SIGINT,func);
-		if(strcmp(com,"exit") ==0)
-		{
-			printf("Goodbye\n");
-			return;
-		}
-		if(strcmp(arrWords[0],"history") == 0)
-		{
-			showHistory();
-			continue;
-		}
-		if(strcmp(arrWords[0], "ls") == 0)
-		{
-			char addit[] = "--color";
-			addToList(addit);
-		}
-		if(execvp(arrWords[0], arrWords)<1)
-		{
-			printf("%s: command not found\n", arrWords[0]);
-		}
-		exit(1);
-		}
-		else
-		{
-			signal(SIGINT,funcMain);
-			if(strcmp(com,"exit")==0)
-				return;
-			wait();
-			continue;
-		}
-
-	}
-	else
+	pipeCount = 0;
+	arrWords = (char**)realloc(arrWords,100*sizeof(char));
+	//return;
+	struct passwd *pw = getpwuid(getuid());
+	const char *homedir = pw->pw_dir;
+	char *argv[] = {"", "", NULL};
+	commandCount = 0;
+	currentIndex = 0;
+	int pid;
+	char com[20];
+	char path[200];
+	val = 0;
+	while(1)
 	{
-		//printf("Pipe found here .. ! \n");
-		pid = fork();
-		if(pid == 0)
+	printf("Command List : ");
+	display();
+	printf("Command Number : %d..\n",commandCount);
+	currentIndex = commandCount;
+	pipeCount = 0;
+	//arrWords = (char**)realloc(arrWords,100*sizeof(char));
+	val = 0;
+	//currentIndex += commandCount;
+
+	getcwd(path,sizeof(path));
+	printf(ANSI_COLOR_BLUE "MyShell:" ANSI_COLOR_GREEN "$ " ANSI_COLOR_RESET);	
+	takeInput();
+	countPipes();
+	if(input == '\'')
+		continue;
+	
+	if(pipeCount == 0)
+	{
+		addToList(input);
+	if(strcmp(arrWords[currentIndex],"cd") == 0)
+	{
+		if(arrWords[currentIndex + 1] == NULL)
 		{
-		seperate();
-		pipedProcess();
-		}	
-		else
+			
+			chdir(homedir);
+			continue;
+		}
+		int len = strlen(arrWords[currentIndex + 1]);
+		char *pt = (char *)(calloc(len,sizeof(char)));
+		strcpy(pt,arrWords[currentIndex + 1]);
+
+		if(chdir(pt)!=0)
 		{
-			wait();
+			printf("%s: no such directory\n",pt);
 		}
 		continue;
 	}
+	else if(strcmp(arrWords[currentIndex], "exit") == 0)
+	{
+		printf("Goodbye\n");
+		return;
 	}
+
+	pid = fork();
+	if(pid == 0)
+	{
+	if(strcmp(com,"exit") ==0)
+	{
+		printf("Goodbye\n");
+		return;
+	}
+	if(strcmp(arrWords[currentIndex], "ls") == 0)
+	{
+		char addit[] = "--color";
+		addToList(addit);
+		printf("CommandCount value : %d.. \n",commandCount);
+	}
+	if(execvp(arrWords[currentIndex], arrWords)<1)
+	{
+		printf("%s: command not found\n", arrWords[currentIndex]);
+	}
+	exit(1);
+	}
+	else
+	{
+		if(strcmp(com,"exit")==0)
+			return;
+		wait();
+		continue;
+	}
+
+}
+else
+{
+	//printf("Pipe found here .. ! \n");
+	pid = fork();
+	if(pid == 0)
+	{
+	seperate();
+	pipedProcess();
+	}	
+	else
+	{
+		wait();
+	}
+	continue;
+}
+}
 
 }
 
