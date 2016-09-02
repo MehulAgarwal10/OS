@@ -258,7 +258,7 @@ int main()
 	takeInput();
 	countPipes();
 	if(input == '\'')
-		continue;
+		continue;	
 	
 	if(pipeCount == 0)
 	{

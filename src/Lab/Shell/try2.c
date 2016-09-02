@@ -62,7 +62,7 @@ void addToList(char *sentence)
 			word = realloc(word,sizeof(char) * (wordI+1));
 			word[wordI] = temp;
 			wordI++;
-		
+
 		}
 	}
 	parse(word);
@@ -73,9 +73,9 @@ void addToList(char *sentence)
 int main()
 {
 	//exec("clear");
-	char *temp = "clear";
-	char *arg[] = {"clear", NULL};
-	execvp(arg[0], arg);
+	//char *temp = "clear";
+	//char *arg[] = {"clear", NULL};
+	//execvp(arg[0], arg);
 	commandCount = 0;
 	currentIndex = 0;
 	struct passwd *pw = getpwuid(getuid());
@@ -85,41 +85,64 @@ int main()
 	char path[200];
 	val = 0;
 	//char *arg[100];
-	
+
 	//char path2[205];
 	while(1)
 	{
-	val = 0;
-	arrWords = (char**)realloc(arrWords,(100*sizeof(char)));
-	currentIndex += commandCount;
+		val = 0;
+		arrWords = (char**)realloc(arrWords,(100*sizeof(char)));
+		currentIndex += commandCount;
 
-	getcwd(path,sizeof(path));
-	printf(ANSI_COLOR_GREEN  "MyShell: $ "  ANSI_COLOR_RESET, path);
-	//printf(path2);		
-	gets(com);
-	//parse(com, arrWords);
-	addToList(com);
-	//char *arg[] = {"", NULL};
-	//arg[0] = com;
-	pid = fork();
-	if(pid == 0)
-	{
-	if(strcmp(com,"exit") ==0)
-	{
-		printf("Goodbye\n");
-		return;
+		getcwd(path,sizeof(path));
+		printf(ANSI_COLOR_GREEN  "MyShell: $ "  ANSI_COLOR_RESET, path);
+		//printf(path2);		
+		gets(com);
+		//parse(com, arrWords);
+		addToList(com);
+		//char *arg[] = {"", NULL};
+		if(strcmp(arrWords[0],"cd") == 0)
+		{
+			if(arrWords[1] == NULL)
+			{
+
+				chdir(homedir);
+				continue;
+			}
+			int len = strlen(arrWords[1]);
+			char *pt = (char *)(calloc(len,sizeof(char)));
+			strcpy(pt,arrWords[1]);
+
+			if(chdir(pt)!=0)
+			{
+				printf("%s: no such directory\n",pt);
+			}
+			continue;
+		}
+		//arg[0] = com;
+		pid = fork();
+		if(pid == 0)
+		{
+			if(strcmp(com,"exit") ==0)
+			{
+				printf("Goodbye\n");
+				return;
+			}
+			if(strcmp(arrWords[0], "ls") == 0)
+			{
+				char addit[] = "--color";
+				addToList(addit);
+			}
+			execvp(arrWords[0], arrWords);
+			exit(0);
+		}
+		else
+		{
+			if(strcmp(com,"exit")==0)
+				return;
+			wait();
+			continue;
+		}
 	}
-	execvp(arrWords[0], arrWords);
-	exit(0);
-	}
-	else
-	{
-		if(strcmp(com,"exit")==0)
-			return;
-		wait();
-		continue;
-	}
-}
 
 }
 
