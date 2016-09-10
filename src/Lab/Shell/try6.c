@@ -12,7 +12,6 @@
 #define ANSI_COLOR_BLUE "\x1b[94m\x1b[1m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 #define ANSI_COLOR_CYAN "\x1b[96m\x1b[1m"
-#define ANSI_COLOR_YELLOW "\x1b[93m\x1b[1m"
 
 int val;
 char **arrWords;
@@ -360,11 +359,7 @@ int main()
 				printf("Goodbye\n");
 				return;
 			}
-			if(strcmp(arrWords[0],"history") == 0)
-			{
-				showHistory();
-				continue;
-			}
+
 			pid = fork();
 			if(pid == 0)
 			{
@@ -374,7 +369,11 @@ int main()
 					printf("Goodbye\n");
 					return;
 				}
-
+				if(strcmp(arrWords[0],"history") == 0)
+				{
+					showHistory();
+					continue;
+				}
 				if(strcmp(arrWords[0], "ls") == 0)
 				{
 					char addit[] = "--color";
@@ -388,7 +387,7 @@ int main()
 			}
 			else
 			{
-
+				
 				if(strcmp(com,"exit")==0)
 					return;
 				wait();

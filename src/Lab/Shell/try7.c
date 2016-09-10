@@ -51,10 +51,10 @@ void trim(char *input, char *output)
 
 void *func()
 {
-	exit(-1);
+	exit(0);
 }
 
-void funcMain()
+void *funcMain()
 {
 	;
 }
@@ -246,7 +246,7 @@ void pipedProcess()
 				printf("%s: command not found\n", arrWords[0]);
 			}
 			//Execute
-			exit(-1);
+			exit(0);
 		}
 	}
 
@@ -275,7 +275,18 @@ char* makePath(char *path, char *home)
 	{
 		return "~";
 	} 
-	if(strcmp(path,home) < 0)
+	int k,flag,homeLength = strlen(home);
+	flag = 0;
+	for(k=0;k<homeLength;k++)
+	{
+		if(path[k] != home[k])
+		{
+			flag = 1;
+			break;
+		}
+	}
+	if(flag == 1)
+	//if(strcmp(path,home) < 0)
 	{
 		return path;
 	}
@@ -300,10 +311,17 @@ char* makePath(char *path, char *home)
 
 }
 
+void childFunc()
+{
+	while(waitpid(-1,0,WNOHANG)>0);
+}
+
 int main()
 {
 	pipeCount = 0;
 	historyCount = 0;
+	int amp1;
+	char amp2;
 	//return;
 	struct passwd *pw = getpwuid(getuid());
 	const char *homedir = pw->pw_dir;
@@ -336,6 +354,11 @@ int main()
 		if(pipeCount == 0)
 		{
 			addToList(input);
+			//printf("Val : %d\n",val);
+			amp1 = strlen(arrWords[val-1]);
+			//printf("Amp1 : %d\n",amp1);
+			amp2 = arrWords[val-1][amp1-1];
+			//printf("Amp2 : %c\n",amp2);
 			if(strcmp(arrWords[0],"cd") == 0)
 			{
 				if(arrWords[1] == NULL)
@@ -368,11 +391,20 @@ int main()
 			pid = fork();
 			if(pid == 0)
 			{
-				signal(SIGINT,func);
+				
+				//else	
+				//signal(SIGINT,func);
 				if(strcmp(com,"exit") ==0)
 				{
 					printf("Goodbye\n");
 					return;
+				}
+				if(amp2 == '&')
+				{
+					printf("Background, PPID : %d\n",getpid());
+					//signal(SIGINT,funcMain);
+					setpgid(0,0);
+					printf("\nNew PPID : %d\n",getpid());
 				}
 
 				if(strcmp(arrWords[0], "ls") == 0)
@@ -384,13 +416,22 @@ int main()
 				{
 					printf("%s: command not found\n", arrWords[0]);
 				}
-				exit(1);
+				
+				exit(0);
 			}
 			else
 			{
 
 				if(strcmp(com,"exit")==0)
 					return;
+				if(amp2 == '&')
+				{
+					printf("Ampersand Found.. Running in backgroun now\n");
+					//signal(SIGCHLD,SIG_IGN);
+					//while(waitpid(1,0,WNOHANG)>0);
+					signal(SIGCHLD,childFunc);
+				}
+				else
 				wait();
 				continue;
 			}

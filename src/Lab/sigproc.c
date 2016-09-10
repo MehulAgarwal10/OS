@@ -17,9 +17,12 @@ int main()
 void handler()
 {
 	printf("\nI will not terminate ! \n");
-	sleep(3);
+	
+	/*sleep(3);
 	printf("Ok nevermind exiting.. \n");
 	exit(0);
+	*/
+	
 }
 
 
