@@ -21,6 +21,7 @@ int main()
 		//wait();
 		//signal(SIGCHLD,SIG_IGN);
 		printf("Parent process ID : %d..\n", getpid());
+		wait();
 		sleep(30);
 		printf("Parent execution.. \n");
 		printf("Zombie state.. \n");

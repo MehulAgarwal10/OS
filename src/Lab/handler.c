@@ -19,7 +19,8 @@ int main()
 	}
 	else
 	{
-		signal(SIGCHLD, func);
+		//signal(SIGCHLD, func);
+		signal(SIGCHLD,SIG_IGN);
 		printf("Parent here.. executing.. \n");
 		sleep(30);
 		printf("Parent exiting.. \n");

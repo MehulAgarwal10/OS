@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
-
+#include <stdlib.h>
 int main()
 {
 
@@ -11,7 +11,7 @@ int main()
 	if(pid == 0)
 	{
 		//Child 
-		printf("Child process..\n");
+		printf("Child process.. ID : %d\n",getpid());
 		exit(0);
 		//while(1);
 	}

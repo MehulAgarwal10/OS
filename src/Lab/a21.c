@@ -4,7 +4,7 @@
 int main()
 {
 
-	int pid = (int)getpid();
+	pid_t pid = getpid();
 
 	printf("Process ID : %d\n",pid);
 	//while(1);
@@ -13,7 +13,7 @@ int main()
 	if(pid == 0)
 	{
 		//Child process
-		int pid2 = (int)getpid();
+		pid_t pid2 = getpid();
 		printf("Child process ID : %d\n",pid2);
 		int num = 5;
 		printf("Address space : %p\n", &num);
@@ -21,7 +21,7 @@ int main()
 	else
 	{
 		//Parent process
-		int pid2 = (int)getpid();
+		pid_t pid2 = getpid();
 		printf("Parent process ID : %d\n",pid2);
 		int num = 5;
 		printf("Address space : %p\n",&num);
