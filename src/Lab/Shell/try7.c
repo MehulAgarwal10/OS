@@ -334,7 +334,7 @@ int main()
 	while(1)
 	{
 		signal(SIGINT,funcMain);
-		getcwd(path,sizeof(path));
+		//getcwd(path,sizeof(path));
 		pipeCount = 0;
 		arrWords = (char**)realloc(arrWords,100*sizeof(char));
 		val = 0;
