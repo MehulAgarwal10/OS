@@ -5,10 +5,14 @@ int main()
 {
 
 
-	printf("Reading content from the file : \n");
+	printf("Reading every 5th byte from the file and writing to output.txt. \n");
 	FILE *fp;
 
 	fp = fopen("./thisFile.txt", "r");
+	FILE *write;
+	write = fopen("./output.txt", "w");
+	FILE *read;
+	read = fopen("./output.txt", "r");
 	char *s = (char*)(malloc(sizeof(char) * 40));
 	char c;
 	char d;
@@ -20,8 +24,21 @@ int main()
 			break;
 		}
 		fseek(fp,5,SEEK_CUR);
-		printf("%c ",c);
+		fprintf(write,"%c-",c);
 	}
-	printf("\n");
+	fclose(write);
+	printf("Done.\nReading from the output file.. \n");
+	while(1)
+	{
+		c = getc(read);
+		if(c == EOF)
+		{
+			printf("\nReached end of file. \n");
+			break;
+		}
+		printf("%c",c);
+	}
+	
+	fclose(read);
 	fclose(fp);
 }

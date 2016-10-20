@@ -18,13 +18,24 @@ int main()
     fd = open(myfifo, O_RDONLY);
     fd2 = open(myfifo2, O_WRONLY);
     char *s = (char *)(malloc(sizeof(char) * 1024));
+    printf("Terminal 2 \n__________\n\n");
     while(1)
     {
     read(fd, buf, MAX_BUF);
-    printf("Received: %s\n", buf);
+    printf("User 1 : %s\n", buf);
+    if(strcmp("exit",buf) == 0)
+    {
+        printf("(User 1 has left, Exiting..)\n");
+        break;
+    }
     printf("User 2 : ");
     gets(s);
     write(fd2, s, MAX_BUF);
+    if(strcmp("exit",s) == 0)
+    {
+        printf("(Exiting ..) \n");
+        break;
+    }
 }
     close(fd);
     close(fd2);

@@ -9,6 +9,8 @@ int main()
 	FILE *fp;
 
 	fp = fopen("./thisFile.txt", "r");
+	FILE *des;
+	des = fopen("./output.txt", "w");
 	char *s = (char*)(malloc(sizeof(char) * 40));
 	char c;
 
